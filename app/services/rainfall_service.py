@@ -1,0 +1,1 @@
+"""CHIRPS rainfall calculation service."""

@@ -1,0 +1,266 @@
+[
+  {
+    "district": "Goalpara",
+    "ndvi": 0.26730074711238283,
+    "rainfall_mm": 431.03746685043797,
+    "water_pixels": 208684,
+    "water_percentage": 4.330161649629657,
+    "water_area_km2": 187.8156
+  },
+  {
+    "district": "Nalbari",
+    "ndvi": 0.23375446692880594,
+    "rainfall_mm": 290.1809547005269,
+    "water_pixels": 20257,
+    "water_percentage": 0.9325087740619211,
+    "water_area_km2": 18.2313
+  },
+  {
+    "district": "Dhubri",
+    "ndvi": 0.28853872981062434,
+    "rainfall_mm": 647.7842582256748,
+    "water_pixels": 96921,
+    "water_percentage": 1.663121216639895,
+    "water_area_km2": 87.2289
+  },
+  {
+    "district": "Sivasagar",
+    "ndvi": 0.3945941936365169,
+    "rainfall_mm": 319.4101392040556,
+    "water_pixels": 20070,
+    "water_percentage": 0.4993624234130563,
+    "water_area_km2": 18.063
+  },
+  {
+    "district": "Karimganj",
+    "ndvi": 0.4180350508347991,
+    "rainfall_mm": 476.2909463868728,
+    "water_pixels": 38593,
+    "water_percentage": 1.1130389340113527,
+    "water_area_km2": 34.7337
+  },
+  {
+    "district": "Tinsukia",
+    "ndvi": 0.3998395484672185,
+    "rainfall_mm": 569.7492740538405,
+    "water_pixels": 121293,
+    "water_percentage": 1.459741660157825,
+    "water_area_km2": 109.1637
+  },
+  {
+    "district": "Hailakandi",
+    "ndvi": 0.5466949018865201,
+    "rainfall_mm": 390.1627105895592,
+    "water_pixels": 12351,
+    "water_percentage": 0.3319791829618962,
+    "water_area_km2": 11.1159
+  },
+  {
+    "district": "Chirang",
+    "ndvi": 0.3729942277954152,
+    "rainfall_mm": 571.3536709146732,
+    "water_pixels": 1422,
+    "water_percentage": 0.03826252613395113,
+    "water_area_km2": 1.2798
+  },
+  {
+    "district": "Dhemaji",
+    "ndvi": 0.335181594686534,
+    "rainfall_mm": 521.6624264049324,
+    "water_pixels": 115263,
+    "water_percentage": 1.0344855439658376,
+    "water_area_km2": 103.7367
+  },
+  {
+    "district": "Morigaon",
+    "ndvi": 0.2704334802339361,
+    "rainfall_mm": 184.1688965349546,
+    "water_pixels": 78124,
+    "water_percentage": 2.1306566761112213,
+    "water_area_km2": 70.3116
+  },
+  {
+    "district": "Karbi Anglong East",
+    "ndvi": 0.5021411111165145,
+    "rainfall_mm": 174.63084542988636,
+    "water_pixels": 393,
+    "water_percentage": 0.002426484766337235,
+    "water_area_km2": 0.3537
+  },
+  {
+    "district": "Lakhimpur",
+    "ndvi": 0.39329173794381117,
+    "rainfall_mm": 459.57676265403194,
+    "water_pixels": 66229,
+    "water_percentage": 0.7905093520948158,
+    "water_area_km2": 59.6061
+  },
+  {
+    "district": "Bongaigaon",
+    "ndvi": 0.25182620288628554,
+    "rainfall_mm": 463.97401042435416,
+    "water_pixels": 72697,
+    "water_percentage": 2.9367494215132437,
+    "water_area_km2": 65.4273
+  },
+  {
+    "district": "Baksa",
+    "ndvi": 0.27186173586139856,
+    "rainfall_mm": 370.16259381160654,
+    "water_pixels": 4536,
+    "water_percentage": 0.09179151911928708,
+    "water_area_km2": 4.0824
+  },
+  {
+    "district": "Nagaon",
+    "ndvi": 0.3309496306720263,
+    "rainfall_mm": 156.91216428031387,
+    "water_pixels": 28689,
+    "water_percentage": 0.306915237091459,
+    "water_area_km2": 25.8201
+  },
+  {
+    "district": "Cachar",
+    "ndvi": 0.48618132035420086,
+    "rainfall_mm": 492.7528188350742,
+    "water_pixels": 65392,
+    "water_percentage": 0.7168819494119807,
+    "water_area_km2": 58.8528
+  },
+  {
+    "district": "Darrang",
+    "ndvi": 0.17904839828060146,
+    "rainfall_mm": 239.29802485333667,
+    "water_pixels": 227534,
+    "water_percentage": 5.027580166320645,
+    "water_area_km2": 204.7806
+  },
+  {
+    "district": "Kamrup",
+    "ndvi": 0.2645870940650877,
+    "rainfall_mm": 270.27948611321887,
+    "water_pixels": 149901,
+    "water_percentage": 1.4404028873206955,
+    "water_area_km2": 134.9109
+  },
+  {
+    "district": "Dibrugarh",
+    "ndvi": 0.3160863830888826,
+    "rainfall_mm": 424.828927945254,
+    "water_pixels": 339420,
+    "water_percentage": 4.385261119547784,
+    "water_area_km2": 305.478
+  },
+  {
+    "district": "Barpeta",
+    "ndvi": 0.19467762848369424,
+    "rainfall_mm": 338.6064880646327,
+    "water_pixels": 289502,
+    "water_percentage": 5.39433931818258,
+    "water_area_km2": 260.5518
+  },
+  {
+    "district": "Sonitpur",
+    "ndvi": 0.30314222292629656,
+    "rainfall_mm": 245.37217448546366,
+    "water_pixels": 252691,
+    "water_percentage": 4.076423976098754,
+    "water_area_km2": 227.4219
+  },
+  {
+    "district": "Udalguri",
+    "ndvi": 0.26414106617028743,
+    "rainfall_mm": 309.02161503007017,
+    "water_pixels": 1437,
+    "water_percentage": 0.03194479086499025,
+    "water_area_km2": 1.2933
+  },
+  {
+    "district": "Golaghat",
+    "ndvi": 0.44764640845148235,
+    "rainfall_mm": 259.8107089703387,
+    "water_pixels": 86220,
+    "water_percentage": 0.7193686376299382,
+    "water_area_km2": 77.598
+  },
+  {
+    "district": "Kamrup Metropolitan",
+    "ndvi": 0.39134164934447274,
+    "rainfall_mm": 210.77374624897067,
+    "water_pixels": 20356,
+    "water_percentage": 0.5886854176872841,
+    "water_area_km2": 18.3204
+  },
+  {
+    "district": "Dima Hasao",
+    "ndvi": 0.5377471082131287,
+    "rainfall_mm": 258.0513052609697,
+    "water_pixels": 22617,
+    "water_percentage": 0.20138557765124956,
+    "water_area_km2": 20.3553
+  },
+  {
+    "district": "Kokrajhar",
+    "ndvi": 0.39475142947632874,
+    "rainfall_mm": 769.040468978524,
+    "water_pixels": 7428,
+    "water_percentage": 0.11874295523208349,
+    "water_area_km2": 6.6852
+  },
+  {
+    "district": "Jorhat",
+    "ndvi": 0.38207690446752857,
+    "rainfall_mm": 327.8600148159791,
+    "water_pixels": 14762,
+    "water_percentage": 0.28138569397161367,
+    "water_area_km2": 13.2858
+  },
+  {
+    "district": "Charaideo",
+    "ndvi": 0.4806924477556276,
+    "rainfall_mm": 404.19641263779096,
+    "water_pixels": 2232,
+    "water_percentage": 0.08963207478977424,
+    "water_area_km2": 2.0088
+  },
+  {
+    "district": "Majuli",
+    "ndvi": 0.18289721286770694,
+    "rainfall_mm": 347.68212265711435,
+    "water_pixels": 263592,
+    "water_percentage": 4.60759121944057,
+    "water_area_km2": 237.2328
+  },
+  {
+    "district": "Biswanath",
+    "ndvi": 0.3173914219317789,
+    "rainfall_mm": 265.73823562113625,
+    "water_pixels": 122200,
+    "water_percentage": 3.0997778407992658,
+    "water_area_km2": 109.98
+  },
+  {
+    "district": "Hojai",
+    "ndvi": 0.4374003398839546,
+    "rainfall_mm": 181.04942279822868,
+    "water_pixels": 4457,
+    "water_percentage": 0.11986151248716537,
+    "water_area_km2": 4.0113
+  },
+  {
+    "district": "Karbi Anglong West",
+    "ndvi": 0.48591858661869225,
+    "rainfall_mm": 272.90313767275967,
+    "water_pixels": 7267,
+    "water_percentage": 0.09485855410866637,
+    "water_area_km2": 6.5403
+  },
+  {
+    "district": "South Salmara-Mankachar",
+    "ndvi": 0.20374058555582605,
+    "rainfall_mm": 547.3001419833073,
+    "water_pixels": 227597,
+    "water_percentage": 7.438554312947635,
+    "water_area_km2": 204.8373
+  }
+]

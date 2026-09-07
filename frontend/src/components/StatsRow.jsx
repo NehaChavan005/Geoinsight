@@ -53,10 +53,10 @@ export default function StatsRow({ data, isLightMode }) {
         const Icon = card.icon;
         const Badge = card.badgeIcon;
         const value =
-          card.key === 'ndvi' ? data?.vegetation?.average_ndvi ?? '--'
-          : card.key === 'rainfall' ? data?.rainfall?.value_mm ?? '--'
-          : card.key === 'coverage' ? data?.surface_water?.coverage_percent ?? '--'
-          : data?.surface_water?.area_km2 ?? '--';
+          card.key === 'ndvi' ? data?.stats?.average_ndvi ?? '--'
+          : card.key === 'rainfall' ? data?.stats?.total_rainfall_mm ?? '--'
+          : card.key === 'coverage' ? data?.stats?.surface_water_coverage_pct ?? '--'
+          : data?.stats?.surface_water_area_km2 ?? '--';
         const unit = card.key === 'ndvi' ? '' : card.key === 'rainfall' ? 'mm' : card.key === 'coverage' ? '%' : 'km²';
 
         return (

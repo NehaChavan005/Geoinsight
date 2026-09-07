@@ -3,13 +3,13 @@ import { LayoutDashboard, Map, FileJson, Info } from 'lucide-react';
 import AnimatedHills from './AnimatedHills';
 
 const NAV_ITEMS = [
-  { label: 'Dashboard', icon: LayoutDashboard, active: true },
-  { label: 'Map', icon: Map, active: false },
-  { label: 'API Docs', icon: FileJson, active: false },
-  { label: 'About', icon: Info, active: false },
+  { label: 'Dashboard', icon: LayoutDashboard, view: 'dashboard' },
+  { label: 'Map', icon: Map, view: 'map' },
+  { label: 'API Docs', icon: FileJson, view: null },
+  { label: 'About', icon: Info, view: null },
 ];
 
-export default function Sidebar({ isLightMode }) {
+export default function Sidebar({ isLightMode, activeView = 'dashboard', onNavigate }) {
   const glassPanel = isLightMode
     ? 'bg-gradient-to-br from-white/90 to-sky-50/70 backdrop-blur-xl border border-sky-100 rounded-2xl shadow-[0_8px_30px_rgba(14,165,233,0.05)]'
     : 'bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.5),_inset_0_1px_0_rgba(255,255,255,0.1)]';
@@ -38,15 +38,17 @@ export default function Sidebar({ isLightMode }) {
       <nav className="flex flex-col gap-1.5 px-3 flex-1">
         {NAV_ITEMS.map((item, i) => {
           const Icon = item.icon;
+          const isActive = item.view ? item.view === activeView : false;
           return (
             <motion.button
               key={item.label}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.15 + i * 0.08 }}
+              onClick={() => item.view && onNavigate?.(item.view)}
               className={`nav-item group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium ${secondaryText} hover:text-white transition-colors relative`}
             >
-              {item.active && (
+              {isActive && (
                 <motion.span
                   layoutId="nav-active"
                   className={`absolute inset-0 rounded-xl ${isLightMode ? 'bg-cyan-500/10 border border-cyan-500/20' : 'bg-cyan-500/10 border border-cyan-500/20 shadow-[inset_0_0_10px_rgba(6,182,212,0.1)]'}`}
@@ -57,7 +59,7 @@ export default function Sidebar({ isLightMode }) {
                 size={18}
                 className={`relative z-10 transition-transform group-hover:scale-110 ${isLightMode ? 'text-cyan-600 group-hover:text-cyan-700' : 'text-cyan-300 group-hover:text-cyan-200'}`}
               />
-              <span className={`relative z-10 ${item.active ? (isLightMode ? 'text-cyan-700' : 'text-cyan-300') : ''}`}>{item.label}</span>
+              <span className={`relative z-10 ${isActive ? (isLightMode ? 'text-cyan-700' : 'text-cyan-300') : ''}`}>{item.label}</span>
             </motion.button>
           );
         })}

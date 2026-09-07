@@ -12,6 +12,8 @@ import GlassCard from './GlassCard';
 import { fetchEnvironmentData } from '../services/apiClient';
 
 export default function DashboardUI({ isLightMode, toggleTheme }) {
+  const [activeView, setActiveView] = useState('dashboard'); // 'dashboard' | 'map'
+  const isMapView = activeView === 'map';
   const [district, setDistrict] = useState('Kamrup');
   const [month, setMonth] = useState('2026-06');
   const [data, setData] = useState(null);
@@ -38,7 +40,11 @@ export default function DashboardUI({ isLightMode, toggleTheme }) {
       <ParticleFlow active={particles} originRef={mapRef} />
 
       {/* Left sidebar */}
-      <Sidebar isLightMode={isLightMode} />
+      <Sidebar
+        isLightMode={isLightMode}
+        activeView={activeView}
+        onNavigate={setActiveView}
+      />
 
       {/* Center content */}
       <div className="flex-1 min-w-0 flex flex-col gap-6">
@@ -46,7 +52,7 @@ export default function DashboardUI({ isLightMode, toggleTheme }) {
 
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
           {/* Left: control, stats, map, bottom */}
-          <div className="xl:col-span-3 flex flex-col gap-6 min-w-0">
+          <div className={`flex flex-col gap-6 min-w-0 ${isMapView ? 'xl:col-span-5' : 'xl:col-span-3'}`}>
             <ControlBar
               district={district}
               setDistrict={setDistrict}
@@ -57,8 +63,8 @@ export default function DashboardUI({ isLightMode, toggleTheme }) {
               isLightMode={isLightMode}
             />
 
-            <AnimatePresence mode="wait">
-              {data && (
+            {!isMapView && data && (
+              <AnimatePresence mode="wait">
                 <motion.div
                   key={`stats-${district}-${month}`}
                   initial={{ opacity: 0, y: 20 }}
@@ -67,21 +73,25 @@ export default function DashboardUI({ isLightMode, toggleTheme }) {
                 >
                   <StatsRow data={data} isLightMode={isLightMode} />
                 </motion.div>
-              )}
-            </AnimatePresence>
+              </AnimatePresence>
+            )}
 
-            {/* Map card */}
+            {/* Map card — expands to fill the screen in map view */}
             <GlassCard
-              className="p-2 w-full h-[450px] max-h-[450px] overflow-hidden"
+              className={
+                isMapView
+                  ? 'p-2 w-full h-[calc(100vh-14rem)] max-h-[calc(100vh-14rem)] overflow-hidden transition-all duration-500'
+                  : 'p-2 w-full h-[450px] max-h-[450px] overflow-hidden transition-all duration-500'
+              }
               delay={0.35}
               animateBorder
               isLightMode={isLightMode}
             >
-              <MapView data={data} mapRef={mapRef} isLightMode={isLightMode} />
+              <MapView data={data} mapRef={mapRef} isLightMode={isLightMode} fill={isMapView} />
             </GlassCard>
 
-            <AnimatePresence mode="wait">
-              {data && (
+            {!isMapView && data && (
+              <AnimatePresence mode="wait">
                 <motion.div
                   key={`bottom-${district}-${month}`}
                   initial={{ opacity: 0, y: 30 }}
@@ -90,14 +100,16 @@ export default function DashboardUI({ isLightMode, toggleTheme }) {
                 >
                   <BottomSection data={data} loading={isLoading} isLightMode={isLightMode} />
                 </motion.div>
-              )}
-            </AnimatePresence>
+              </AnimatePresence>
+            )}
           </div>
 
-          {/* Right: intelligence panel */}
-          <div className="xl:col-span-2 min-w-0">
-            <IntelligencePanel data={data} loading={isLoading} isLightMode={isLightMode} />
-          </div>
+          {/* Right: intelligence panel (dashboard view only) */}
+          {!isMapView && (
+            <div className="xl:col-span-2 min-w-0">
+              <IntelligencePanel data={data} loading={isLoading} isLightMode={isLightMode} />
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

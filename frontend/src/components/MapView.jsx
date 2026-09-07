@@ -1,32 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import { motion } from 'framer-motion';
 import 'leaflet/dist/leaflet.css';
 import '../styles/MapView.css';
-
-const kamrupBoundary = {
-  type: 'FeatureCollection',
-  features: [
-    {
-      type: 'Feature',
-      properties: { name: 'Kamrup' },
-      geometry: {
-        type: 'Polygon',
-        coordinates: [
-          [
-            [90.7, 25.9],
-            [91.3, 25.8],
-            [91.9, 26.0],
-            [92.0, 26.4],
-            [91.5, 26.8],
-            [90.7, 26.6],
-            [90.7, 25.9],
-          ],
-        ],
-      },
-    },
-  ],
-};
 
 const waterRegions = {
   type: 'FeatureCollection',
@@ -193,14 +169,25 @@ function LayersBox({ isLightMode, layers, onToggle }) {
   );
 }
 
-export default function MapView({ data, mapRef, isLightMode }) {
-  const center = [26.35, 91.6];
+export default function MapView({ data, mapRef, isLightMode, fill = false }) {
+  // 1. Adjusted to frame all of Assam with a wider view
+  const center = [26.2006, 92.9376];
+  const defaultZoom = 7;
   const [layers, setLayers] = useState({
     Boundary: true,
     'Surface Water': true,
     NDVI: true,
     Rainfall: false,
   });
+  const [geoData, setGeoData] = useState(null);
+
+  // 2. Dynamically load the full Assam district GeoJSON from /public
+  useEffect(() => {
+    fetch('/assam_districts.geojson')
+      .then((response) => response.json())
+      .then((data) => setGeoData(data))
+      .catch((error) => console.error('Error loading Assam map data:', error));
+  }, []);
 
   const toggleLayer = (name) => {
     setLayers((prev) => ({ ...prev, [name]: !prev[name] }));
@@ -211,10 +198,11 @@ export default function MapView({ data, mapRef, isLightMode }) {
     : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
 
   const boundaryStyle = {
-    color: isLightMode ? '#0284c7' : '#06b6d4',
-    weight: 3,
+    color: isLightMode ? '#0ea5e9' : '#06b6d4',
+    weight: 2,
     fillColor: isLightMode ? '#38bdf8' : '#06b6d4',
     fillOpacity: isLightMode ? 0.15 : 0.1,
+    dashArray: '4, 4',
     className: 'boundary-glow',
   };
 
@@ -223,22 +211,23 @@ export default function MapView({ data, mapRef, isLightMode }) {
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.7, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="relative w-full h-[434px] max-h-[434px] overflow-hidden rounded-2xl pointer-events-auto"
+      className={`relative w-full overflow-hidden rounded-2xl pointer-events-auto ${fill ? 'h-full max-h-none' : 'h-[434px] max-h-[434px]'}`}
       ref={mapRef}
     >
       <MapContainer
         center={center}
-        zoom={9}
+        zoom={defaultZoom}
         data-testid="map"
         style={{ height: '100%', width: '100%', background: isLightMode ? '#f8fafc' : '#0f172a' }}
         zoomControl={false}
         attributionControl={false}
       >
         <TileLayer url={tileUrl} key={isLightMode ? 'tile-light' : 'tile-dark'} />
-        {layers.Boundary && (
+        {/* Render the full state map only once data is loaded */}
+        {layers.Boundary && geoData && (
           <GeoJSON
             key={isLightMode ? 'boundary-light' : 'boundary-dark'}
-            data={kamrupBoundary}
+            data={geoData}
             pathOptions={boundaryStyle}
             onEachFeature={(feature, layer) => layer.bindPopup(buildPopup(feature, isLightMode))}
           />
@@ -257,10 +246,11 @@ function buildPopup(feature, isLightMode) {
   const props = feature.properties;
   const textColor = isLightMode ? '#0f172a' : '#e0f2fe';
   const mutedColor = isLightMode ? '#64748b' : '#bae6fd';
+  const name = props.district || props.name || 'Region';
   return `
     <div class="custom-popup">
-      <h4 style="font-weight:bold;color:${textColor};margin-bottom:4px;">${props.name || 'Region'}</h4>
-      <p style="font-size:12px;color:${mutedColor};">Data available for this sector.</p>
+      <h4 style="font-weight:bold;color:${textColor};margin-bottom:4px;">${name}</h4>
+      <p style="font-size:12px;color:${mutedColor};">Assam district boundary.</p>
     </div>
   `;
 }

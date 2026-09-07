@@ -8,16 +8,16 @@ const THUMBNAILS = [
   { label: 'Rainfall', bg: 'linear-gradient(135deg,#1e3a8a,#60a5fa,#1e293b)' },
 ];
 
-const QUICK_STATS = [
-  { label: 'Districts Analyzed', value: '1 / 27' },
-  { label: 'Raster Scenes', value: '12' },
-  { label: 'Processing', value: 'GPU · CUDA' },
-  { label: 'Latency', value: '1.2s' },
+const QUICK_STATS = (data) => [
+  { label: 'Districts Analyzed', value: data?.metadata?.districts_analyzed || '1 / 27' },
+  { label: 'Raster Scenes', value: data?.metadata?.raster_scenes || '12' },
+  { label: 'Processing', value: data?.metadata?.processing || 'GPU · CUDA' },
+  { label: 'Latency', value: data?.metadata?.latency_seconds ? `${data.metadata.latency_seconds}s` : '1.2s' },
 ];
 
 export default function IntelligencePanel({ data, loading, isLightMode }) {
   const insightText =
-    data?.insight ||
+    data?.ai_insight?.summary ||
     'Select a district and month, then Generate Report to receive a natural-language environmental summary powered by Llama 3.2.';
 
   const primaryText = isLightMode ? 'text-slate-800' : 'text-white';
@@ -74,7 +74,7 @@ export default function IntelligencePanel({ data, loading, isLightMode }) {
       <GlassCard className="p-4" delay={0.65} isLightMode={isLightMode}>
         <h3 className={`text-sm font-semibold mb-3 ${primaryText}`}>Quick Stats</h3>
         <div className="grid grid-cols-2 gap-2.5">
-          {QUICK_STATS.map((s) => (
+          {QUICK_STATS(data).map((s) => (
             <div key={s.label} className={interactiveCard}>
               <p className={`text-[10px] uppercase tracking-wider ${secondaryText}`}>{s.label}</p>
               <p className={`text-sm font-semibold mt-0.5 ${primaryText}`}>{s.value}</p>

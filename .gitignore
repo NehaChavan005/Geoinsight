@@ -1,2 +1,13 @@
+# Python generated files
+__pycache__/
+*.pyc
+*.pyo
 
+# Virtual environment
+.venv/
+
+# Environment variables
+.env
+
+# Sentinel-2 raster data
 data/sentinel2/*.tif

@@ -1,0 +1,42 @@
+
+> geoinsight-frontend@0.0.0 dev
+> vite --port 5180
+
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m1272[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5180[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m5:17:26 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/FreshEarthBackground.jsx, /src/styles/global.css[22m
+[2m5:17:33 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/FreshEarthBackground.jsx, /src/styles/global.css[22m
+[2m5:17:51 am[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m5:17:55 am[22m [36m[1m[vite][22m[39m [32mvite.config.js changed, restarting server...[39m
+[2m5:17:55 am[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m5:17:55 am[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m5:17:56 am[22m [36m[1m[vite][22m[39m server restarted.
+[2m5:35:20 am[22m [36m[1m[vite][22m[39m [32mvite.config.js changed, restarting server...[39m
+[2m5:35:21 am[22m [36m[1m[vite][22m[39m server restarted.
+node:internal/fs/watchers:321
+    const error = new UVException({
+                  ^
+
+Error: EBUSY: resource busy or locked, watch 'F:\New folder (2)\Geoinsight\frontend\dist\earth-bg.png'
+    at FSWatcher.<computed> (node:internal/fs/watchers:321:19)
+    at Object.watch (node:fs:2548:36)
+    at createFsWatchInstance (file:///F:/New%20folder%20(2)/Geoinsight/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:42780:17)
+    at setFsWatchListener (file:///F:/New%20folder%20(2)/Geoinsight/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:42827:15)
+    at NodeFsHandler._watchWithNodeFs (file:///F:/New%20folder%20(2)/Geoinsight/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:42982:14)
+    at NodeFsHandler._handleFile (file:///F:/New%20folder%20(2)/Geoinsight/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:43046:23)
+    at NodeFsHandler._addToNodeFs (file:///F:/New%20folder%20(2)/Geoinsight/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:43288:21)
+Emitted 'error' event on FSWatcher instance at:
+    at FSWatcher._handleError (file:///F:/New%20folder%20(2)/Geoinsight/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:44481:10)
+    at NodeFsHandler._addToNodeFs (file:///F:/New%20folder%20(2)/Geoinsight/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:43296:18) {
+  errno: -4082,
+  syscall: 'watch',
+  code: 'EBUSY',
+  path: 'F:\\New folder (2)\\Geoinsight\\frontend\\dist\\earth-bg.png',
+  filename: 'F:\\New folder (2)\\Geoinsight\\frontend\\dist\\earth-bg.png'
+}
+
+Node.js v24.18.0

@@ -89,11 +89,12 @@ def _render_band_to_png(arr, colormap: str | None = None) -> bytes:
 
     gray = (norm * 255).astype(np.uint8)
 
-    def _chunk(data: bytes) -> bytes:
+    def _chunk(chunk_type: bytes, chunk_data: bytes) -> bytes:
         import zlib
 
-        return len(data).to_bytes(4, "big") + data + (
-            (zlib.crc32(data) & 0xFFFFFFFF).to_bytes(4, "big")
+        block = chunk_type + chunk_data
+        return len(chunk_data).to_bytes(4, "big") + block + (
+            (zlib.crc32(block) & 0xFFFFFFFF).to_bytes(4, "big")
         )
 
     import zlib
@@ -101,10 +102,11 @@ def _render_band_to_png(arr, colormap: str | None = None) -> bytes:
     with io.BytesIO() as buf:
         h, w = gray.shape
         buf.write(b"\x89PNG\r\n\x1a\n")
-        buf.write(_chunk(b"IHDR" + w.to_bytes(4, "big") + h.to_bytes(4, "big") + b"\x08\x00\x00\x00\x00"))
+        ihdr = w.to_bytes(4, "big") + h.to_bytes(4, "big") + b"\x08\x00\x00\x00\x00"
+        buf.write(_chunk(b"IHDR", ihdr))
         raw = b"".join(b"\x00" + gray[y, :].tobytes() for y in range(h))
-        buf.write(_chunk(b"IDAT" + zlib.compress(raw)))
-        buf.write(_chunk(b"IEND"))
+        buf.write(_chunk(b"IDAT", zlib.compress(raw)))
+        buf.write(_chunk(b"IEND", b""))
         buf.seek(0)
         return buf.read()
 

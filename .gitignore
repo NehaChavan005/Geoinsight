@@ -22,3 +22,7 @@ data/**/*.aux.xml
 
 # Runtime cache (sqlite)
 data/cache.sqlite3
+
+# Frontend generated files
+frontend/node_modules/
+frontend/dist/

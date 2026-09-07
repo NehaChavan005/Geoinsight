@@ -10,5 +10,10 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+    watch: {
+      // dist/ contains build artifacts (large PNGs); watching it can crash Vite
+      // with EBUSY on Windows.
+      ignored: ['**/dist/**'],
+    },
   },
 })

@@ -9,15 +9,27 @@ const THUMBNAILS = [
 ];
 
 const QUICK_STATS = (data) => [
-  { label: 'Districts Analyzed', value: data?.metadata?.districts_analyzed || '1 / 27' },
-  { label: 'Raster Scenes', value: data?.metadata?.raster_scenes || '12' },
-  { label: 'Processing', value: data?.metadata?.processing || 'GPU · CUDA' },
-  { label: 'Latency', value: data?.metadata?.latency_seconds ? `${data.metadata.latency_seconds}s` : '1.2s' },
+  { label: 'District', value: data?.district || '—' },
+  {
+    label: 'District Area',
+    value:
+      data?.metadata?.district_area_km2 != null
+        ? `${Number(data.metadata.district_area_km2).toFixed(2)} km²`
+        : '—',
+  },
+  {
+    label: 'Processing',
+    value:
+      data?.metadata?.processing_time_ms != null
+        ? `${data.metadata.processing_time_ms} ms`
+        : '—',
+  },
+  { label: 'Cached', value: data?.metadata?.cached ? 'Yes' : 'No' },
 ];
 
-export default function IntelligencePanel({ data, loading, isLightMode }) {
+export default function IntelligencePanel({ data, insight, loading, isLightMode }) {
   const insightText =
-    data?.ai_insight?.summary ||
+    insight?.insight ||
     'Select a district and month, then Generate Report to receive a natural-language environmental summary powered by Llama 3.2.';
 
   const primaryText = isLightMode ? 'text-slate-800' : 'text-white';

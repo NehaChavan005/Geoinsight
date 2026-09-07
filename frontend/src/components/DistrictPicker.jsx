@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin } from 'lucide-react';
+import { fetchDistricts } from '../services/apiClient';
 
-const DISTRICTS = [
+// Built-in fallback list, used only if the backend's /api/v1/districts can't be reached.
+const FALLBACK_DISTRICTS = [
   'Bajali',
   'Baksa',
   'Barpeta',
@@ -43,11 +45,23 @@ const DISTRICTS = [
 export default function DistrictPicker({ isLightMode, value = 'Kamrup', onChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState(value);
+  const [districts, setDistricts] = useState(FALLBACK_DISTRICTS);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
     setSelectedDistrict(value);
   }, [value]);
+
+  // Load the list of supported districts from the backend when available.
+  useEffect(() => {
+    fetchDistricts()
+      .then((list) => {
+        if (Array.isArray(list) && list.length > 0) {
+          setDistricts(list.map((d) => d.display_name));
+        }
+      })
+      .catch((error) => console.warn('Could not load districts from API; using built-in list.', error));
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -125,7 +139,7 @@ export default function DistrictPicker({ isLightMode, value = 'Kamrup', onChange
             className={`absolute top-full left-0 mt-3 w-72 max-h-80 overflow-y-auto premium-scrollbar rounded-2xl p-2 z-[99999] ${glassPanel}`}
           >
             <div className="flex flex-col gap-1">
-              {DISTRICTS.map((district) => {
+              {districts.map((district) => {
                 const isActive = selectedDistrict === district;
                 return (
                   <button

@@ -1,108 +1,18 @@
-import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
+import { useState, useEffect, useMemo } from 'react';
+import { MapContainer, TileLayer, GeoJSON, ImageOverlay, useMap } from 'react-leaflet';
 import { motion } from 'framer-motion';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../styles/MapView.css';
+import { getDistrictId, fetchBoundary, fetchLayer } from '../services/apiClient';
 
-const waterRegions = {
-  type: 'FeatureCollection',
-  features: [
-    {
-      type: 'Feature',
-      properties: { name: 'Brahmaputra' },
-      geometry: {
-        type: 'Polygon',
-        coordinates: [
-          [
-            [90.95, 26.35],
-            [91.2, 26.25],
-            [91.5, 26.3],
-            [91.8, 26.28],
-            [91.9, 26.38],
-            [91.55, 26.45],
-            [91.2, 26.42],
-            [90.95, 26.35],
-          ],
-        ],
-      },
-    },
-    {
-      type: 'Feature',
-      properties: { name: 'Deepor Beel' },
-      geometry: {
-        type: 'Polygon',
-        coordinates: [
-          [
-            [91.45, 26.12],
-            [91.5, 26.1],
-            [91.55, 26.13],
-            [91.52, 26.16],
-            [91.46, 26.15],
-            [91.45, 26.12],
-          ],
-        ],
-      },
-    },
-  ],
-};
-
-const vegetationRegions = {
-  type: 'FeatureCollection',
-  features: [
-    {
-      type: 'Feature',
-      properties: { name: 'Vegetation' },
-      geometry: {
-        type: 'Polygon',
-        coordinates: [
-          [
-            [91.0, 26.55],
-            [91.3, 26.6],
-            [91.5, 26.65],
-            [91.6, 26.72],
-            [91.35, 26.78],
-            [91.05, 26.72],
-            [91.0, 26.55],
-          ],
-        ],
-      },
-    },
-  ],
-};
-
-function WaterRippleLayer({ isLightMode }) {
-  return (
-    <>
-      <GeoJSON
-        data={waterRegions}
-        pathOptions={{
-          color: 'rgba(56,189,248,0.0)',
-          weight: 0,
-          fillColor: '#38bdf8',
-          fillOpacity: 0.4,
-          className: 'water-ripple',
-        }}
-        key={isLightMode ? 'water-light' : 'water-dark'}
-      />
-      <div className="water-ripple-waves" />
-    </>
-  );
-}
-
-function GrassWindLayer({ isLightMode }) {
-  return (
-    <GeoJSON
-      data={vegetationRegions}
-      pathOptions={{
-        color: 'rgba(34,197,94,0.0)',
-        weight: 0,
-        fillColor: '#22c55e',
-        fillOpacity: 0.45,
-        className: 'grass-wind',
-      }}
-      key={isLightMode ? 'grass-light' : 'grass-dark'}
-    />
-  );
+// Re-fits the map viewport whenever the selected district boundary changes.
+function FitBounds({ bounds }) {
+  const map = useMap();
+  useEffect(() => {
+    if (bounds && map) map.fitBounds(bounds, { padding: [20, 20] });
+  }, [map, bounds]);
+  return null;
 }
 
 function Legend({ isLightMode }) {
@@ -134,14 +44,16 @@ function Legend({ isLightMode }) {
   );
 }
 
-function LayersBox({ isLightMode, layers, onToggle }) {
+function LayersBox({ isLightMode, layers, loading, errors, onToggle }) {
   const subText = isLightMode ? 'text-slate-500' : 'text-slate-400';
   const overlayGlass = isLightMode
     ? 'bg-white/80 backdrop-blur-xl border border-sky-100 shadow-[0_8px_30px_rgba(14,165,233,0.15)]'
     : 'bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.5)]';
 
+  const failedKeys = Object.keys(errors).filter((k) => errors[k]);
+
   return (
-    <div className={`absolute top-4 left-4 z-[1000] p-4 rounded-xl flex flex-col gap-3 min-w-[160px] pointer-events-auto ${overlayGlass}`}>
+    <div className={`absolute top-4 left-4 z-[1000] p-4 rounded-xl flex flex-col gap-3 min-w-[172px] pointer-events-auto ${overlayGlass}`}>
       <h4 className={`text-xs font-bold uppercase tracking-widest mb-1 flex items-center gap-2 ${isLightMode ? 'text-slate-800' : 'text-white'}`}>
         Map Layers
       </h4>
@@ -155,54 +67,120 @@ function LayersBox({ isLightMode, layers, onToggle }) {
               type="checkbox"
               checked={layers[layer]}
               onChange={() => onToggle(layer)}
+              disabled={loading[layer]}
               className={`w-4 h-4 rounded border accent-cyan-500 cursor-pointer transition-colors ${
                 isLightMode ? 'bg-sky-50 border-sky-200' : 'bg-slate-800 border-slate-600'
               }`}
             />
             <span className={`text-sm font-medium transition-colors group-hover:text-cyan-500 ${layers[layer] ? (isLightMode ? 'text-slate-800' : 'text-white') : subText}`}>
               {layer}
+              {loading[layer] && (
+                <span className="ml-2 w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin inline-block align-middle" />
+              )}
             </span>
           </label>
         ))}
       </div>
+      {failedKeys.length > 0 && (
+        <p className={`text-[10px] leading-snug ${isLightMode ? 'text-rose-600' : 'text-rose-300'}`}>
+          Could not load {failedKeys.join(', ')}. Check the backend and toggle again.
+        </p>
+      )}
     </div>
   );
 }
 
-export default function MapView({ data, mapRef, isLightMode, fill = false }) {
-  // 1. Adjusted to frame all of Assam with a wider view
-  const center = [26.2006, 92.9376];
-  const defaultZoom = 7;
+const LAYER_KEYS = { NDVI: 'ndvi', 'Surface Water': 'water', Rainfall: 'rainfall' };
+
+export default function MapView({ data, district, month, mapRef, isLightMode, fill = false }) {
   const [layers, setLayers] = useState({
     Boundary: true,
-    'Surface Water': true,
-    NDVI: true,
+    'Surface Water': false,
+    NDVI: false,
     Rainfall: false,
   });
-  const [geoData, setGeoData] = useState(null);
+  const [assamGeo, setAssamGeo] = useState(null);
+  const [boundaryGeo, setBoundaryGeo] = useState(null);
+  const [overlays, setOverlays] = useState({ ndvi: null, water: null, rainfall: null });
+  const [overlayLoading, setOverlayLoading] = useState({ ndvi: false, water: false, rainfall: false });
+  const [overlayErrors, setOverlayErrors] = useState({ ndvi: null, water: null, rainfall: null });
 
-  // 2. Dynamically load the full Assam district GeoJSON from /public
   useEffect(() => {
     fetch('/assam_districts.geojson')
       .then((response) => response.json())
-      .then((data) => setGeoData(data))
+      .then((result) => setAssamGeo(result))
       .catch((error) => console.error('Error loading Assam map data:', error));
   }, []);
 
+  // Real district boundary straight from the backend.
+  useEffect(() => {
+    let cancelled = false;
+    setBoundaryGeo(null);
+    setOverlays({ ndvi: null, water: null, rainfall: null });
+    setOverlayErrors({ ndvi: null, water: null, rainfall: null });
+    getDistrictId(district)
+      .then((districtId) => fetchBoundary(districtId))
+      .then((feature) => {
+        if (!cancelled) setBoundaryGeo(feature);
+      })
+      .catch((error) => {
+        if (!cancelled) console.error('Boundary load failed:', error);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [district]);
+
+  const boundaryBounds = useMemo(() => {
+    if (!boundaryGeo) return null;
+    try {
+      return L.geoJSON(boundaryGeo).getBounds();
+    } catch {
+      return null;
+    }
+  }, [boundaryGeo]);
+
+  // Lazily loads a raster layer PNG from the backend when toggled on.
+  const loadLayer = async (layerType) => {
+    setOverlayLoading((prev) => ({ ...prev, [layerType]: true }));
+    try {
+      const districtId = await getDistrictId(district);
+      const payload = await fetchLayer(layerType, districtId, month);
+      setOverlays((prev) => ({ ...prev, [layerType]: payload }));
+      setOverlayErrors((prev) => ({ ...prev, [layerType]: null }));
+    } catch (error) {
+      console.error(`Layer ${layerType} failed:`, error);
+      setOverlayErrors((prev) => ({ ...prev, [layerType]: error.message || 'request failed' }));
+    } finally {
+      setOverlayLoading((prev) => ({ ...prev, [layerType]: false }));
+    }
+  };
+
   const toggleLayer = (name) => {
     setLayers((prev) => ({ ...prev, [name]: !prev[name] }));
+    const layerType = LAYER_KEYS[name];
+    if (layerType && !overlays[layerType] && !overlayLoading[layerType]) {
+      loadLayer(layerType);
+    }
   };
 
   const tileUrl = isLightMode
     ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
     : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
 
-  const boundaryStyle = {
+  const assamStyle = {
     color: isLightMode ? '#0ea5e9' : '#06b6d4',
-    weight: 2,
+    weight: 1,
     fillColor: isLightMode ? '#38bdf8' : '#06b6d4',
-    fillOpacity: isLightMode ? 0.15 : 0.1,
+    fillOpacity: isLightMode ? 0.08 : 0.05,
     dashArray: '4, 4',
+  };
+
+  const districtStyle = {
+    color: isLightMode ? '#e11d48' : '#f43f5e',
+    weight: 3,
+    fillColor: isLightMode ? '#e11d48' : '#f43f5e',
+    fillOpacity: 0.08,
     className: 'boundary-glow',
   };
 
@@ -215,42 +193,68 @@ export default function MapView({ data, mapRef, isLightMode, fill = false }) {
       ref={mapRef}
     >
       <MapContainer
-        center={center}
-        zoom={defaultZoom}
+        center={[26.15, 91.38]}
+        zoom={9}
         data-testid="map"
         style={{ height: '100%', width: '100%', background: isLightMode ? '#f8fafc' : '#0f172a' }}
         zoomControl={false}
         attributionControl={false}
       >
         <TileLayer url={tileUrl} key={isLightMode ? 'tile-light' : 'tile-dark'} />
-        {/* Render the full state map only once data is loaded */}
-        {layers.Boundary && geoData && (
+        <FitBounds bounds={boundaryBounds} />
+
+        {/* Real raster overlays from the backend, clipped to the district */}
+        {layers.NDVI && overlays.ndvi && (
+          <ImageOverlay url={overlays.ndvi.image} bounds={overlays.ndvi.bounds} opacity={0.75} />
+        )}
+        {layers['Surface Water'] && overlays.water && (
+          <ImageOverlay url={overlays.water.image} bounds={overlays.water.bounds} opacity={0.55} />
+        )}
+        {layers.Rainfall && overlays.rainfall && (
+          <ImageOverlay url={overlays.rainfall.image} bounds={overlays.rainfall.bounds} opacity={0.6} />
+        )}
+
+        {/* State context boundaries */}
+        {layers.Boundary && assamGeo && (
+          <GeoJSON
+            key={isLightMode ? 'assam-light' : 'assam-dark'}
+            data={assamGeo}
+            pathOptions={assamStyle}
+          />
+        )}
+
+        {/* Real district boundary from the backend, highlighted on top */}
+        {layers.Boundary && boundaryGeo && (
           <GeoJSON
             key={isLightMode ? 'boundary-light' : 'boundary-dark'}
-            data={geoData}
-            pathOptions={boundaryStyle}
+            data={boundaryGeo}
+            pathOptions={districtStyle}
             onEachFeature={(feature, layer) => layer.bindPopup(buildPopup(feature, isLightMode))}
           />
         )}
-        {data && layers['Surface Water'] && <WaterRippleLayer isLightMode={isLightMode} />}
-        {data && layers.NDVI && <GrassWindLayer isLightMode={isLightMode} />}
       </MapContainer>
 
-      <LayersBox isLightMode={isLightMode} layers={layers} onToggle={toggleLayer} />
+      <LayersBox
+        isLightMode={isLightMode}
+        layers={layers}
+        loading={overlayLoading}
+        errors={overlayErrors}
+        onToggle={toggleLayer}
+      />
       <Legend isLightMode={isLightMode} />
     </motion.div>
   );
 }
 
 function buildPopup(feature, isLightMode) {
-  const props = feature.properties;
+  const props = feature.properties || {};
   const textColor = isLightMode ? '#0f172a' : '#e0f2fe';
   const mutedColor = isLightMode ? '#64748b' : '#bae6fd';
   const name = props.district || props.name || 'Region';
   return `
     <div class="custom-popup">
       <h4 style="font-weight:bold;color:${textColor};margin-bottom:4px;">${name}</h4>
-      <p style="font-size:12px;color:${mutedColor};">Assam district boundary.</p>
+      <p style="font-size:12px;color:${mutedColor};">Kamrup district boundary.</p>
     </div>
   `;
 }

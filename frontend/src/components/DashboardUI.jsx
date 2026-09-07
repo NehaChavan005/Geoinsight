@@ -9,7 +9,7 @@ import BottomSection from './BottomSection';
 import IntelligencePanel from './IntelligencePanel';
 import ParticleFlow from './ParticleFlow';
 import GlassCard from './GlassCard';
-import { fetchEnvironmentData } from '../services/apiClient';
+import { fetchEnvironmentData, fetchInsight, getDistrictId } from '../services/apiClient';
 
 export default function DashboardUI({ isLightMode, toggleTheme }) {
   const [activeView, setActiveView] = useState('dashboard'); // 'dashboard' | 'map'
@@ -17,18 +17,51 @@ export default function DashboardUI({ isLightMode, toggleTheme }) {
   const [district, setDistrict] = useState('Kamrup');
   const [month, setMonth] = useState('2026-06');
   const [data, setData] = useState(null);
+  const [insight, setInsight] = useState(null);
+  const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [particles, setParticles] = useState(false);
   const mapRef = useRef(null);
 
   const handleGenerate = async () => {
     setIsLoading(true);
-    const result = await fetchEnvironmentData(district, month);
-    setData(result);
-    setIsLoading(false);
+    setError(null);
     setParticles(true);
     setTimeout(() => setParticles(false), 2200);
+    try {
+      const districtId = await getDistrictId(district);
+      const [env, ai] = await Promise.all([
+        fetchEnvironmentData(districtId, month),
+        fetchInsight(districtId, month),
+      ]);
+      setData(env);
+      setInsight(ai);
+    } catch (err) {
+      console.error('GeoInsight API request failed:', err);
+      setError(err && err.message ? err.message : 'Request failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const errorBanner = error ? (
+    <div
+      className={`rounded-xl px-4 py-3 text-sm flex items-center justify-between gap-3 ${
+        isLightMode
+          ? 'bg-rose-50 border border-rose-300 text-rose-700'
+          : 'bg-rose-500/15 border border-rose-400/40 text-rose-200'
+      }`}
+      role="alert"
+    >
+      <span className="truncate">API error: {error}</span>
+      <button
+        onClick={handleGenerate}
+        className="shrink-0 px-3 py-1 text-xs font-bold rounded-lg bg-rose-500 text-white hover:bg-rose-600 cursor-pointer transition-colors"
+      >
+        Retry
+      </button>
+    </div>
+  ) : null;
 
   return (
     <motion.div
@@ -53,6 +86,8 @@ export default function DashboardUI({ isLightMode, toggleTheme }) {
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
           {/* Left: control, stats, map, bottom */}
           <div className={`flex flex-col gap-6 min-w-0 ${isMapView ? 'xl:col-span-5' : 'xl:col-span-3'}`}>
+            {errorBanner}
+
             <ControlBar
               district={district}
               setDistrict={setDistrict}
@@ -87,7 +122,7 @@ export default function DashboardUI({ isLightMode, toggleTheme }) {
               animateBorder
               isLightMode={isLightMode}
             >
-              <MapView data={data} mapRef={mapRef} isLightMode={isLightMode} fill={isMapView} />
+              <MapView data={data} district={district} month={month} mapRef={mapRef} isLightMode={isLightMode} fill={isMapView} />
             </GlassCard>
 
             {!isMapView && data && (
@@ -107,7 +142,7 @@ export default function DashboardUI({ isLightMode, toggleTheme }) {
           {/* Right: intelligence panel (dashboard view only) */}
           {!isMapView && (
             <div className="xl:col-span-2 min-w-0">
-              <IntelligencePanel data={data} loading={isLoading} isLightMode={isLightMode} />
+              <IntelligencePanel data={data} insight={insight} loading={isLoading} isLightMode={isLightMode} />
             </div>
           )}
         </div>

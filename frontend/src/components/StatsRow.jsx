@@ -5,32 +5,34 @@ import { Leaf, CloudRain, Droplets, Maximize, TrendingUp, Activity, Check } from
 
 const CARDS = [
   { id: 'ndvi', label: 'Average NDVI', key: 'ndvi', icon: Leaf, status: 'Green', badgeCls: 'bg-emerald-400/15 text-emerald-300 border-emerald-400/30', badgeIcon: TrendingUp, iconCls: 'text-emerald-400', decimals: 2 },
-  { id: 'rainfall', label: 'Total Rainfall', key: 'rainfall', icon: CloudRain, status: 'Monsoon', badgeCls: 'bg-sky-400/15 text-sky-300 border-sky-400/30', badgeIcon: Activity, iconCls: 'text-sky-400', decimals: 0 },
+  { id: 'rainfall', label: 'Total Rainfall', key: 'rainfall', icon: CloudRain, status: 'Monsoon', badgeCls: 'bg-sky-400/15 text-sky-300 border-sky-400/30', badgeIcon: Activity, iconCls: 'text-sky-400', decimals: 1 },
   { id: 'coverage', label: 'Surface Water Coverage', key: 'coverage', icon: Droplets, status: 'Stable', badgeCls: 'bg-cyan-400/15 text-cyan-300 border-cyan-400/30', badgeIcon: Check, iconCls: 'text-cyan-400', decimals: 1 },
-  { id: 'area', label: 'Surface Water Area', key: 'area', icon: Maximize, status: 'Sector A', badgeCls: 'bg-teal-400/15 text-teal-300 border-teal-400/30', badgeIcon: Maximize, iconCls: 'text-teal-400', decimals: 1 },
+  { id: 'area', label: 'Surface Water Area', key: 'area', icon: Maximize, status: 'Sector A', badgeCls: 'bg-teal-400/15 text-teal-300 border-teal-400/30', badgeIcon: Maximize, iconCls: 'text-teal-400', decimals: 2 },
 ];
 
 function CountUp({ value, decimals = 0, duration = 1500 }) {
   const [display, setDisplay] = useState('0');
-  const ref = useRef(null);
-  const started = useRef(false);
+  const rafRef = useRef(null);
 
   useEffect(() => {
-    if (value === '--' || value == null || started.current) return;
-    started.current = true;
+    if (value == null || value === '--') {
+      setDisplay('--');
+      return undefined;
+    }
     const num = parseFloat(value);
-    if (isNaN(num)) { setDisplay(String(value)); return; }
-
+    if (isNaN(num)) {
+      setDisplay(String(value));
+      return undefined;
+    }
     const start = performance.now();
     const step = (now) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
+      const progress = Math.min((now - start) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       setDisplay((num * eased).toFixed(decimals));
-      if (progress < 1) ref.current = requestAnimationFrame(step);
+      if (progress < 1) rafRef.current = requestAnimationFrame(step);
     };
-    ref.current = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(ref.current);
+    rafRef.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafRef.current);
   }, [value, decimals, duration]);
 
   return <span>{display}</span>;
@@ -53,10 +55,10 @@ export default function StatsRow({ data, isLightMode }) {
         const Icon = card.icon;
         const Badge = card.badgeIcon;
         const value =
-          card.key === 'ndvi' ? data?.stats?.average_ndvi ?? '--'
-          : card.key === 'rainfall' ? data?.stats?.total_rainfall_mm ?? '--'
-          : card.key === 'coverage' ? data?.stats?.surface_water_coverage_pct ?? '--'
-          : data?.stats?.surface_water_area_km2 ?? '--';
+          card.key === 'ndvi' ? data?.vegetation?.average_ndvi ?? '--'
+          : card.key === 'rainfall' ? data?.rainfall?.value_mm ?? '--'
+          : card.key === 'coverage' ? data?.surface_water?.coverage_percent ?? '--'
+          : data?.surface_water?.area_km2 ?? '--';
         const unit = card.key === 'ndvi' ? '' : card.key === 'rainfall' ? 'mm' : card.key === 'coverage' ? '%' : 'km²';
 
         return (

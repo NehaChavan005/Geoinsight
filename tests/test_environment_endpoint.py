@@ -185,7 +185,9 @@ def test_environment_all_datasets_missing_still_200(client, monkeypatch):
 
 
 def test_layer_endpoint_missing_data_returns_503(client):
-    resp = client.get("/api/v1/layers/ndvi?district=kamrup&month=2026-06")
+    # 2000-01 has no Sentinel-2 raster for Kamrup, so the layer must report
+    # DATA_NOT_FOUND regardless of which real datasets exist on disk.
+    resp = client.get("/api/v1/layers/ndvi?district=kamrup&month=2000-01")
     assert resp.status_code == 503
     assert resp.json()["error"]["code"] == "DATA_NOT_FOUND"
 
@@ -366,16 +368,16 @@ def test_adapter_forwards_to_wired_member_a_function(monkeypatch):
     assert result["pixel_count"] == 42
 
 
-def test_adapter_not_connected_raises():
-    """With no functions wired, adapter raises ProcessingNotConnectedError."""
-    from app.exceptions import ProcessingNotConnectedError
+def test_adapter_missing_data_raises_data_not_found():
+    """Wired Member A adapters surface missing datasets, never fabricate values."""
+    from app.exceptions import DataNotFoundError
     from app.services import processing_adapter
 
-    with pytest.raises(ProcessingNotConnectedError):
+    with pytest.raises(DataNotFoundError):
         processing_adapter.call_ndvi("geom", "/nonexistent")
-    with pytest.raises(ProcessingNotConnectedError):
+    with pytest.raises(DataNotFoundError):
         processing_adapter.call_rainfall("geom", "/nonexistent")
-    with pytest.raises(ProcessingNotConnectedError):
+    with pytest.raises(DataNotFoundError):
         processing_adapter.call_water("geom", "/nonexistent")
 
 

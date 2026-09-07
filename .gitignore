@@ -9,5 +9,16 @@ __pycache__/
 # Environment variables
 .env
 
-# Sentinel-2 raster data
+# Large raster datasets (too big for GitHub; served from a local GEOINSIGHT_DATA_DIR)
 data/sentinel2/*.tif
+data/sentinel2/**/*.tif
+data/chirps/**/*.tif
+data/jrc_water/**/*.tif
+data/rainfall/*.tif
+data/water/*.tif
+
+# GDAL sidecar files
+data/**/*.aux.xml
+
+# Runtime cache (sqlite)
+data/cache.sqlite3

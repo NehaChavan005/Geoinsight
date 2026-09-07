@@ -65,17 +65,19 @@ def get_district_geometry(district_id: str):
 
 
 def get_district_area_km2(district_id: str) -> float:
-    """Compute district area in km² using an equal-area projection.
+    """Compute district area in km² using the geodesic (ellipsoidal) area.
 
-    ``Albers Equal Area`` (ESRI:102025) is used when possible so the area is
-    meaningful across India; falls back to WGS84 lon/lat degrees otherwise.
+    ``pyproj.Geod`` returns the true WGS84 ellipsoid surface area, which is
+    projection-independent and immune to the local PROJ EPSG database variants
+    (e.g. ``ESRI:102025`` is not available in every build).  The planar
+    lon/lat fallback is only a last resort and would not be in km².
     """
     geom = get_district_geometry(district_id)
     try:
-        from pyproj import CRS, Transformer
+        from pyproj import Geod
 
-        transformer = Transformer.from_crs(CRS.from_epsg(4326), CRS.from_epsg(102025), always_xy=True)
-        projected = transformer.transform(geom)
-        return float(projected.area) / 1_000_000.0
+        geod = Geod(ellps="WGS84")
+        area, _perimeter = geod.geometry_area_perimeter(geom)
+        return float(abs(area)) / 1_000_000.0
     except Exception:
         return float(geom.area)

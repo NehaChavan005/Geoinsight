@@ -14,7 +14,12 @@ import io
 import logging
 from pathlib import Path
 
-from app.config import get_chirps_path, get_sentinel_path, get_water_path
+from app.config import (
+    get_chirps_path,
+    get_sentinel_path,
+    get_water_path,
+    sentinel2_band_files,
+)
 from app.exceptions import DataNotFoundError
 from app.services import processing_adapter
 from app.services.boundary_service import (
@@ -35,9 +40,10 @@ COLORMAPS = {
 
 def _resolve_raster_dir(layer_type: str, district_id: str, month: str) -> Path:
     if layer_type == "ndvi":
-        data_dir: Path = get_sentinel_path(district_id, month)
-        if not (data_dir / "B4.tif").exists() or not (data_dir / "B8.tif").exists():
+        red, nir = sentinel2_band_files(district_id, month)
+        if not red.is_file() or not nir.is_file():
             raise DataNotFoundError("Sentinel-2", district_id, month)
+        data_dir = get_sentinel_path(district_id, month)
     elif layer_type == "rainfall":
         data_dir = get_chirps_path(district_id, month)
         if not data_dir.exists() or not list(data_dir.glob("*.tif")):
